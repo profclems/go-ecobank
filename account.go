@@ -115,7 +115,8 @@ type AccountEnquiryThirdPartyOptions struct {
 	DestinationBankCode string `json:"destinationBankCode"`
 	ClientID            string `json:"clientId"`
 	CompanyName         string `json:"companyName"`
-	SecureHash          string `json:"secureHash"`
+
+	secureHashOption
 }
 
 // EnquiryThirdParty performs an account inquiry for third-party payment.
@@ -144,4 +145,54 @@ func (a *AccountService) GenerateStatement(ctx context.Context, opt *GenerateSta
 	}
 
 	return *statements, resp, nil
+}
+
+// CreateAccountOptions represents the parameters for creating an account.
+type CreateAccountOptions struct {
+	ClientID           string `json:"clientId"`
+	RequestID          string `json:"requestId"`
+	AffiliateCode      string `json:"affiliateCode"`
+	FirstName          string `json:"firstName"`
+	Middlename         string `json:"middlename"`
+	Lastname           string `json:"lastname"`
+	MobileNo           string `json:"mobileNo"`
+	Gender             string `json:"gender"`
+	IdentityNo         string `json:"identityNo"`
+	IdentityType       string `json:"identityType"`
+	IDIssueDate        string `json:"iDIssueDate"`
+	IDExpiryDate       string `json:"iDExpiryDate"`
+	Ccy                string `json:"ccy"`
+	Country            string `json:"country"`
+	BranchCode         string `json:"branchCode"`
+	DateOfBirth        string `json:"dateOfBirth"`
+	CountryOfResidence string `json:"countryOfResidence"`
+	Email              string `json:"email"`
+	Street             string `json:"street"`
+	City               string `json:"city"`
+	State              string `json:"state"`
+	Image              string `json:"image"`
+	Signature          string `json:"signature"`
+
+	secureHashOption
+}
+
+// CreateAccountResponse represents the response after attempting to create an account.
+type CreateAccountResponse struct {
+	Shortname      string `json:"shortname"`
+	AccountNo      string `json:"accountNo"`
+	MobileNo       string `json:"mobileNo"`
+	TrackRef       string `json:"trackRef"`
+	ClientID       string `json:"clientId"`
+	HostHeaderInfo struct {
+		SourceCode      string `json:"sourceCode"`
+		RequestID       string `json:"requestId"`
+		AffiliateCode   string `json:"affiliateCode"`
+		ResponseCode    string `json:"responseCode"`
+		ResponseMessage string `json:"responseMessage"`
+	} `json:"hostHeaderInfo"`
+}
+
+// CreateAccount creates an account.
+func (a *AccountService) CreateAccount(ctx context.Context, opt *CreateAccountOptions) (*CreateAccountResponse, *Response, error) {
+	return DoRequest[CreateAccountResponse](ctx, a.client, "POST", "merchant/createexpressaccount", opt)
 }

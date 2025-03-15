@@ -24,7 +24,44 @@ func main() {
 	err = client.Login(ctx)
 	checkErr(errors.Wrap(err, "failed to login"))
 
+	fmt.Println("Creating account...")
+	// open account
+	createOpts := &ecobank.CreateAccountOptions{
+		ClientID:           "ECO76383823",
+		RequestID:          "ECO76383823",
+		AffiliateCode:      "ENG",
+		FirstName:          "Rotimi",
+		Middlename:         "",
+		Lastname:           "Akinola",
+		MobileNo:           "2348089991325",
+		Gender:             "M",
+		IdentityNo:         "198837383982",
+		IdentityType:       "MOBILE_WALLET_NO",
+		IDIssueDate:        "01072021",
+		IDExpiryDate:       "01072021",
+		Ccy:                "NGN",
+		Country:            "NGN",
+		BranchCode:         "ENG",
+		DateOfBirth:        "01072021",
+		CountryOfResidence: "NIGERIA",
+		Email:              "treknfreedom@yahoo.com",
+		Street:             "Labone",
+		City:               "Accra",
+		State:              "Accra",
+		Image:              "oeyetweuiww8262822999999999",
+		Signature:          "orjerjeklellwewpw726527289292",
+	}
+	createOpts.SetHash("a43aa74662060b7b9c942dd7ace565a0919118db758bcd71a0f5c7cd7e349f6309b02866b6156ef9171a1b23119c71e77db2edd38cc89963d7f34b541d6dc461")
+	account, resp, err := client.Account.CreateAccount(ctx, createOpts)
+	checkErr(errors.Wrap(err, "failed to create account"))
+
+	fmt.Println("Code:", resp.Code)
+	fmt.Println("Message:", resp.Message)
+	checkErr(json.NewEncoder(os.Stdout).Encode(account))
+	fmt.Println()
+
 	// get account balance
+	fmt.Println("Getting account balance...")
 	acctBal, resp, err := client.Account.GetBalance(ctx, &ecobank.AccountBalanceOptions{
 		RequestID:     "14232436312",
 		AffiliateCode: "EGH",
@@ -40,6 +77,7 @@ func main() {
 	fmt.Println()
 
 	// get account details
+	fmt.Println("Getting account details...")
 	enquiry, resp, err := client.Account.Enquiry(ctx, &ecobank.AccountEnquiryOptions{
 		RequestID:     "14232436312",
 		AffiliateCode: "EGH",
@@ -54,6 +92,7 @@ func main() {
 	checkErr(json.NewEncoder(os.Stdout).Encode(enquiry))
 	fmt.Println()
 
+	fmt.Println("Getting third party account details")
 	enquiryTP, resp, err := client.Account.EnquiryThirdParty(ctx, &ecobank.AccountEnquiryThirdPartyOptions{
 		RequestID:           "726262198272",
 		AffiliateCode:       "EGH",
@@ -68,6 +107,7 @@ func main() {
 	checkErr(json.NewEncoder(os.Stdout).Encode(enquiryTP))
 	fmt.Println()
 
+	fmt.Println("Generating account statement...")
 	statementOptions := &ecobank.GenerateStatementOptions{
 		RequestID:     "123456",
 		ClientID:      "ZEEPAY",

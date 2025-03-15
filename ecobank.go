@@ -257,10 +257,6 @@ func (c *Client) doRequest(req *retryablehttp.Request, v any) (*Response, error)
 func (c *Client) ensureSecureHash(opt any) {
 	if sh, ok := opt.(secureHasher); ok && sh.GetHash() == "" {
 		sh.SetHash(generateSecureHashFrom(opt, c.labKey))
-
-		if sh.GetHash() != "398d4f285cc33e12f035da19fa9d954be35afaf66816531c4f1a1aedd3c6f132a85c62b23ca12d7b9a99bf5a84fc69b66738289a70e8f8115e90ffaa060f4026" {
-			log.Println("Secure hash does not match")
-		}
 	}
 }
 
@@ -295,8 +291,6 @@ func generateSecureHashFrom(v any, key string) string {
 
 		b.WriteString(formatToStr(fieldValue.Interface()))
 	}
-
-	log.Println("String to hash:", b.String()+key)
 
 	return generateSecureHash(b.String(), key)
 }
