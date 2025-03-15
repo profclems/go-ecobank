@@ -138,37 +138,43 @@ func (p *PaymentService) ValidateBiller(ctx context.Context, opt *ValidateBiller
 // PaymentOptions represents a request to make a payment.
 //
 // API docs: https://documenter.getpostman.com/view/9576712/2s7YtWCtNX#fca97841-db96-4828-bc1b-525e973efe91
-type PaymentOptions[T SupportedPaymentParamType] struct {
-	PaymentHeader struct {
-		Clientid          string          `json:"clientid"`
-		Batchsequence     string          `json:"batchsequence"`
-		Batchamount       decimal.Decimal `json:"batchamount"`
-		Transactionamount decimal.Decimal `json:"transactionamount"`
-		Batchid           string          `json:"batchid"`
-		Transactioncount  int             `json:"transactioncount"`
-		Batchcount        int             `json:"batchcount"`
-		Transactionid     string          `json:"transactionid"`
-		Debittype         string          `json:"debittype"`
-		AffiliateCode     string          `json:"affiliateCode"`
-		Totalbatches      string          `json:"totalbatches"`
-		ExecutionDate     Time            `json:"execution_date"`
-	} `json:"paymentHeader"`
-	Extension []struct {
-		RequestId   string          `json:"request_id"`
-		RequestType PaymentType     `json:"request_type"`
-		ParamList   T               `json:"param_list"`
-		Amount      decimal.Decimal `json:"amount"`
-		Currency    string          `json:"currency"`
-		Status      string          `json:"status"`
-		RateType    string          `json:"rate_type"`
-	} `json:"extension"`
+type PaymentOptions struct {
+	PaymentHeader PaymentHeader      `json:"paymentHeader"`
+	Extension     []PaymentExtension `json:"extension"`
 
 	secureHashOption
+}
+
+// PaymentHeader is the main payload for a payment request.
+type PaymentHeader struct {
+	Batchsequence     string          `json:"batchsequence"`
+	Batchamount       decimal.Decimal `json:"batchamount"`
+	Transactionamount decimal.Decimal `json:"transactionamount"`
+	Batchid           string          `json:"batchid"`
+	Transactioncount  int             `json:"transactioncount"`
+	Batchcount        int             `json:"batchcount"`
+	Transactionid     string          `json:"transactionid"`
+	Debittype         string          `json:"debittype"`
+	AffiliateCode     string          `json:"affiliateCode"`
+	Totalbatches      string          `json:"totalbatches"`
+	ExecutionDate     Time            `json:"execution_date"`
+	Clientid          string          `json:"clientid"`
+}
+
+// PaymentExtension contains additional information for a payment request.
+type PaymentExtension struct {
+	RequestId   string                `json:"request_id"`
+	RequestType PaymentType           `json:"request_type"`
+	ParamList   PaymentParamInterface `json:"param_list"`
+	Amount      decimal.Decimal       `json:"amount"`
+	Currency    string                `json:"currency"`
+	Status      string                `json:"status"`
+	RateType    string                `json:"rate_type"`
 }
 
 // Pay sends a payment request to the Ecobank API.
 //
 // API docs: https://documenter.getpostman.com/view/9576712/2s7YtWCtNX#fca97841-db96-4828-bc1b-525e973efe91
-func (p *PaymentService) Pay(ctx context.Context, opt *PaymentOptions[SupportedPaymentParamType]) (*string, *Response, error) {
-	return DoRequest[string](ctx, p.client, http.MethodPost, "/payment/pay", opt)
+func (p *PaymentService) Pay(ctx context.Context, opt *PaymentOptions) (*string, *Response, error) {
+	return DoRequest[string](ctx, p.client, http.MethodPost, "merchant/payment", opt)
 }

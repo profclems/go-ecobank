@@ -68,8 +68,7 @@ func main() {
 	checkErr(json.NewEncoder(os.Stdout).Encode(enquiryTP))
 	fmt.Println()
 
-	// generate account statement
-	statement, resp, err := client.Account.GenerateStatement(ctx, &ecobank.GenerateStatementOptions{
+	statementOptions := &ecobank.GenerateStatementOptions{
 		RequestID:     "123456",
 		ClientID:      "ZEEPAY",
 		AffiliateCode: "EGH",
@@ -77,7 +76,9 @@ func main() {
 		AccountNumber: "1441000574000",
 		StartDate:     ecobank.NewDate(time.Date(2020, 3, 1, 0, 0, 0, 0, time.UTC)),
 		EndDate:       ecobank.NewDate(time.Date(2020, 3, 16, 0, 0, 0, 0, time.UTC)),
-	})
+	}
+	// generate account statement
+	statement, resp, err := client.Account.GenerateStatement(ctx, statementOptions)
 	checkErr(errors.Wrap(err, "failed to generate statement"))
 
 	fmt.Println("Code:", resp.Code)

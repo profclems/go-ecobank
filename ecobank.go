@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -172,6 +173,8 @@ func (c *Client) NewRequest(ctx context.Context, method, path string, opts any) 
 		if err != nil {
 			return nil, err
 		}
+
+		log.Printf("Request body: %s", body)
 	}
 
 	req, err := retryablehttp.NewRequestWithContext(ctx, method, u.String(), body)
@@ -254,6 +257,10 @@ func (c *Client) doRequest(req *retryablehttp.Request, v any) (*Response, error)
 func (c *Client) ensureSecureHash(opt any) {
 	if sh, ok := opt.(secureHasher); ok && sh.GetHash() == "" {
 		sh.SetHash(generateSecureHashFrom(opt, c.labKey))
+
+		if sh.GetHash() != "398d4f285cc33e12f035da19fa9d954be35afaf66816531c4f1a1aedd3c6f132a85c62b23ca12d7b9a99bf5a84fc69b66738289a70e8f8115e90ffaa060f4026" {
+			log.Println("Secure hash does not match")
+		}
 	}
 }
 
@@ -269,23 +276,27 @@ func generateSecureHashFrom(v any, key string) string {
 	var b strings.Builder
 
 	for i := 0; i < val.NumField(); i++ {
+		fieldType := typ.Field(i)
+		fieldValue := val.Field(i)
 		// check if it's a struct and has the name PaymentHeader
 		// For payment, the secure hash is generated from the PaymentHeader struct
-		if typ.Kind() == reflect.Struct && typ.Field(i).Tag.Get("json") == "paymentHeader" {
-			return generateSecureHashFrom(val.Field(i).Interface(), key)
+		if typ.Kind() == reflect.Struct && fieldType.Tag.Get("json") == "paymentHeader" {
+			return generateSecureHashFrom(fieldValue.Interface(), key)
 		}
 
 		// skip unexported fields, anonymous fields, fields with securehash tag set to ignore, and fields with json tag set to "-"
-		if !val.Field(i).CanInterface() ||
-			typ.Field(i).Anonymous ||
-			typ.Field(i).Tag.Get("securehash") == "ignore" ||
-			typ.Field(i).Tag.Get("json") == "-" ||
-			typ.Field(i).Tag.Get("json") == "secureHash" {
+		if !fieldValue.CanInterface() ||
+			fieldType.Anonymous ||
+			fieldType.Tag.Get("securehash") == "ignore" ||
+			fieldType.Tag.Get("json") == "-" ||
+			fieldType.Tag.Get("json") == "secureHash" {
 			continue
 		}
 
-		b.WriteString(val.Field(i).String())
+		b.WriteString(formatToStr(fieldValue.Interface()))
 	}
+
+	log.Println("String to hash:", b.String()+key)
 
 	return generateSecureHash(b.String(), key)
 }
