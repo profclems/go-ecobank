@@ -34,48 +34,6 @@ type BillerInfo struct {
 	ProductCodeList     string          `json:"productCodeList"`
 }
 
-// BillerList is the response payload for getting the biller list.
-//
-// API docs: https://documenter.getpostman.com/view/9576712/2s7YtWCtNX#eec6e30d-de2b-4565-89a1-cded3a7a8284
-type BillerList struct {
-	BillerInfo     []BillerInfo `json:"billerInfo"`
-	HostHeaderInfo struct {
-		SourceCode      string `json:"sourceCode"`
-		RequestID       string `json:"requestId"`
-		AffiliateCode   string `json:"affiliateCode"`
-		ResponseCode    int    `json:"responseCode"`
-		ResponseMessage string `json:"responseMessage"`
-	} `json:"hostHeaderInfo"`
-}
-
-// ValidateBillerResponse represents the response payload for validating a biller.
-//
-// API docs: https://documenter.getpostman.com/view/9576712/2s7YtWCtNX#575a20cc-d7d1-4627-9665-1211622e1523
-type ValidateBillerResponse struct {
-	HostHeaderInfo struct {
-		SourceCode      string `json:"sourceCode"`
-		RequestID       string `json:"requestId"`
-		AffiliateCode   string `json:"affiliateCode"`
-		ResponseCode    int    `json:"responseCode"`
-		ResponseMessage string `json:"responseMessage"`
-	} `json:"hostHeaderInfo"`
-	BillerCode         string          `json:"billerCode"`
-	BillRefNo          string          `json:"billRefNo"`
-	CustomerName       string          `json:"customerName"`
-	Amount             decimal.Decimal `json:"amount"`
-	PaymentDescription string          `json:"paymentDescription"`
-	ProductCode        string          `json:"productCode"`
-	ResponseValues     string          `json:"responseValues"`
-	FormDataValue      []struct {
-		FieldName        string `json:"fieldName"`
-		FieldDescription string `json:"fieldDescription"`
-		FieldMasked      string `json:"fieldMasked"`
-		FieldValue       string `json:"fieldValue"`
-		FieldRequired    string `json:"fieldRequired"`
-		DataType         string `json:"dataType"`
-	} `json:"formDataValue"`
-}
-
 // GetBillerListOptions represents the request payload for getting the biller list.
 //
 // API docs: https://documenter.getpostman.com/view/9576712/2s7YtWCtNX#eec6e30d-de2b-4565-89a1-cded3a7a8284
@@ -91,8 +49,22 @@ type GetBillerListOptions struct {
 // GetBillerList fetches the list of billers from the Ecobank API.
 //
 // API docs: https://documenter.getpostman.com/view/9576712/2s7YtWCtNX#eec6e30d-de2b-4565-89a1-cded3a7a8284
-func (s *PaymentService) GetBillerList(ctx context.Context, req *GetBillerListOptions) (*BillerList, *Response, error) {
-	return DoRequest[BillerList](ctx, s.client, http.MethodPost, "payment/getbillerlist", req)
+func (p *PaymentService) GetBillerList(ctx context.Context, req *GetBillerListOptions) (*BillerList, *Response, error) {
+	return DoRequest[BillerList](ctx, p.client, http.MethodPost, "payment/getbillerlist", req)
+}
+
+// BillerList is the response payload for getting the biller list.
+//
+// API docs: https://documenter.getpostman.com/view/9576712/2s7YtWCtNX#eec6e30d-de2b-4565-89a1-cded3a7a8284
+type BillerList struct {
+	BillerInfo     []BillerInfo `json:"billerInfo"`
+	HostHeaderInfo struct {
+		SourceCode      string `json:"sourceCode"`
+		RequestID       string `json:"requestId"`
+		AffiliateCode   string `json:"affiliateCode"`
+		ResponseCode    int    `json:"responseCode"`
+		ResponseMessage string `json:"responseMessage"`
+	} `json:"hostHeaderInfo"`
 }
 
 // GetBillerDetailsOptions represents the request payload for retrieving biller details.
@@ -127,6 +99,34 @@ type ValidateBillerOptions struct {
 	} `json:"formDataValue"`
 
 	secureHashOption
+}
+
+// ValidateBillerResponse represents the response payload for validating a biller.
+//
+// API docs: https://documenter.getpostman.com/view/9576712/2s7YtWCtNX#575a20cc-d7d1-4627-9665-1211622e1523
+type ValidateBillerResponse struct {
+	HostHeaderInfo struct {
+		SourceCode      string `json:"sourceCode"`
+		RequestID       string `json:"requestId"`
+		AffiliateCode   string `json:"affiliateCode"`
+		ResponseCode    int    `json:"responseCode"`
+		ResponseMessage string `json:"responseMessage"`
+	} `json:"hostHeaderInfo"`
+	BillerCode         string          `json:"billerCode"`
+	BillRefNo          string          `json:"billRefNo"`
+	CustomerName       string          `json:"customerName"`
+	Amount             decimal.Decimal `json:"amount"`
+	PaymentDescription string          `json:"paymentDescription"`
+	ProductCode        string          `json:"productCode"`
+	ResponseValues     string          `json:"responseValues"`
+	FormDataValue      []struct {
+		FieldName        string `json:"fieldName"`
+		FieldDescription string `json:"fieldDescription"`
+		FieldMasked      string `json:"fieldMasked"`
+		FieldValue       string `json:"fieldValue"`
+		FieldRequired    string `json:"fieldRequired"`
+		DataType         string `json:"dataType"`
+	} `json:"formDataValue"`
 }
 
 // ValidateBiller validates a biller.
