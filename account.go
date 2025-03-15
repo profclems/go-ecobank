@@ -6,13 +6,18 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-// AccountService represents the account service of the Ecobank API.
+// AccountService handles communication with the account related methods of the Ecobank API.
+// It combines both account services and account opening services.
+//
+// API docs: https://documenter.getpostman.com/view/9576712/2s7YtWCtNX#03be64b9-f0dd-4df6-9cca-9e8062943bae
 type AccountService struct {
 	client *Client
 }
 
-// AccountBalanceResponse represents a response to an account balance request.
-type AccountBalanceResponse struct {
+// AccountBalance represents a response to an account balance request.
+//
+// API docs: https://documenter.getpostman.com/view/9576712/2s7YtWCtNX#89d7f8b9-49d8-4a8a-ae3c-acd26cb3e6fe
+type AccountBalance struct {
 	HostHeaderInfo struct {
 		SourceCode      string `json:"sourceCode"`
 		RequestID       string `json:"requestId"`
@@ -87,8 +92,8 @@ type AccountBalanceOptions struct {
 }
 
 // GetBalance gets the account balance for the given account.
-func (a *AccountService) GetBalance(ctx context.Context, opt *AccountBalanceOptions) (*AccountBalanceResponse, *Response, error) {
-	return DoRequest[AccountBalanceResponse](ctx, a.client, "POST", "merchant/accountbalance", opt)
+func (a *AccountService) GetBalance(ctx context.Context, opt *AccountBalanceOptions) (*AccountBalance, *Response, error) {
+	return DoRequest[AccountBalance](ctx, a.client, "POST", "merchant/accountbalance", opt)
 }
 
 // AccountEnquiryOptions represents a request to get account details.

@@ -7,7 +7,8 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-// PaymentService represents the payment service of the Ecobank API.
+// PaymentService handles communication with the payment related methods of the Ecobank API
+// including bill payments and other transfers.
 //
 // API docs: https://documenter.getpostman.com/view/9576712/2s7YtWCtNX#149a5d48-68d6-459b-92e1-5100607d1311
 type PaymentService struct {
