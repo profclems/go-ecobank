@@ -23,6 +23,9 @@ const (
 	userAgent      = "go-ecobank"
 	origin         = "developer.ecobank.com"
 	contentType    = "application/json"
+
+	// by default, token expires in 2 hours
+	defautlTokenExpiry = 7200 * time.Second
 )
 
 // Client manages communication with the Ecobank API.
@@ -45,7 +48,7 @@ type Client struct {
 
 	AccessToken *AccessTokenService
 	Account     *AccountService
-	Payment     PaymentService
+	Payment     *PaymentService
 }
 
 // NewClient returns a new Ecobank API client.
@@ -69,7 +72,7 @@ func NewClient(username, password, labKey string, opts ...ClientOptionFunc) (*Cl
 
 	c.AccessToken = &AccessTokenService{client: c}
 	c.Account = &AccountService{client: c}
-	c.Payment = PaymentService{client: c}
+	c.Payment = &PaymentService{client: c}
 
 	for _, opt := range opts {
 		if err := opt(c); err != nil {
@@ -98,7 +101,7 @@ func DoRequest[T any](ctx context.Context, client *Client, method, path string, 
 }
 
 // Login authenticates the client and stores the access token in the client.
-func (c *Client) Login(ctx context.Context) error {
+func (c *Client) Login(ctx context.Context) (err error) {
 	req := &AccessTokenOptions{
 		UserID:   c.username,
 		Password: c.password,
@@ -114,7 +117,11 @@ func (c *Client) Login(ctx context.Context) error {
 	}
 
 	c.token = token.Token
-	c.tokenExpiresAt = time.Now().Add(1 * time.Hour).Add(50 * time.Minute)
+	c.tokenExpiresAt, err = getTokenExpiry(c.token)
+	if err != nil {
+		// set a default expiry time
+		c.tokenExpiresAt = time.Now().Add(defautlTokenExpiry)
+	}
 
 	return nil
 }
@@ -191,9 +198,10 @@ func (c *Client) NewRequest(ctx context.Context, method, path string, opts any) 
 
 // Do sends an API request and returns the API response.
 func (c *Client) Do(req *retryablehttp.Request, v any) (*Response, error) {
+	// authenticate if token is not set or has expired
 	if c.token == "" || time.Now().After(c.tokenExpiresAt) {
 		if c.username == "" && c.password == "" {
-			return nil, errors.New("no token provided")
+			return nil, errors.New("no credentials provided to acquire a token")
 		}
 		if err := c.Login(req.Context()); err != nil {
 			return nil, err

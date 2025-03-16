@@ -182,8 +182,8 @@ func TestAccountService_GenerateStatement(t *testing.T) {
 		ClientID:      "ZEEPAY",
 		AffiliateCode: "EGH",
 		AccountNumber: "1441000574000",
-		StartDate:     Date{Time: time.Date(2020, 3, 1, 0, 0, 0, 0, time.UTC)},
-		EndDate:       Date{Time: time.Date(2020, 3, 16, 0, 0, 0, 0, time.UTC)},
+		StartDate:     NewDate(time.Date(2020, 3, 1, 0, 0, 0, 0, time.UTC)),
+		EndDate:       NewDate(time.Date(2020, 3, 16, 0, 0, 0, 0, time.UTC)),
 	}
 
 	resp, _, err := client.Account.GenerateStatement(t.Context(), opt)

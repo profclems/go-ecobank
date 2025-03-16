@@ -1,10 +1,12 @@
 package ecobank
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/shopspring/decimal"
@@ -189,4 +191,30 @@ func formatToStr(v any) string {
 	default:
 		return ""
 	}
+}
+
+type tokenClaims struct {
+	Exp int64 `json:"exp"`
+}
+
+func getTokenExpiry(token string) (time.Time, error) {
+	parts := strings.SplitN(token, ".", 3)
+	if len(parts) != 3 {
+		return time.Time{}, fmt.Errorf("invalid JWT format")
+	}
+
+	payload := parts[1]
+
+	// Decode base64 without manually adding padding
+	decoded, err := base64.RawURLEncoding.DecodeString(payload)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("failed to decode base64: %w", err)
+	}
+
+	var claims tokenClaims
+	if err := json.Unmarshal(decoded, &claims); err != nil {
+		return time.Time{}, fmt.Errorf("failed to unmarshal JSON: %w", err)
+	}
+
+	return time.Unix(claims.Exp, 0), nil
 }
