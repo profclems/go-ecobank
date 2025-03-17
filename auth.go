@@ -2,6 +2,10 @@ package ecobank
 
 import "context"
 
+type AuthService struct {
+	client *Client
+}
+
 // AccessTokenOptions represents a request to get an access token.
 type AccessTokenOptions struct {
 	UserID   string `json:"userId"`
@@ -14,12 +18,8 @@ type BearerToken struct {
 	Token    string `json:"token"`
 }
 
-type AccessTokenService struct {
-	client *Client
-}
-
-// GetToken gets an access token for the given user.
-func (a *AccessTokenService) GetToken(ctx context.Context, opt *AccessTokenOptions) (*BearerToken, *Response, error) {
+// GetAccessToken gets an access token for the given user.
+func (a *AuthService) GetAccessToken(ctx context.Context, opt *AccessTokenOptions) (*BearerToken, *Response, error) {
 	req, err := a.client.NewRequest(ctx, "POST", "user/token", opt)
 	if err != nil {
 		return nil, nil, err

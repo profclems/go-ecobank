@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -46,10 +45,10 @@ type Client struct {
 	// UserAgent is set in the User-Agent header of all requests.
 	UserAgent string
 
-	AccessToken *AccessTokenService
-	Account     *AccountService
-	Payment     *PaymentService
-	Remittance  *RemittanceService
+	Auth       *AuthService
+	Account    *AccountService
+	Payment    *PaymentService
+	Remittance *RemittanceService
 }
 
 // NewClient returns a new Ecobank API client.
@@ -71,7 +70,7 @@ func NewClient(username, password, labKey string, opts ...ClientOptionFunc) (*Cl
 		return nil, err
 	}
 
-	c.AccessToken = &AccessTokenService{client: c}
+	c.Auth = &AuthService{client: c}
 	c.Account = &AccountService{client: c}
 	c.Payment = &PaymentService{client: c}
 
@@ -150,7 +149,7 @@ func (c *Client) Login(ctx context.Context) (err error) {
 		Password: c.password,
 	}
 
-	token, resp, err := c.AccessToken.GetToken(ctx, req)
+	token, resp, err := c.Auth.GetAccessToken(ctx, req)
 	if err != nil {
 		return err
 	}
@@ -223,8 +222,6 @@ func (c *Client) NewRequest(ctx context.Context, method, path string, opts any) 
 		if err != nil {
 			return nil, err
 		}
-
-		log.Printf("Request body: %s", body)
 	}
 
 	req, err := retryablehttp.NewRequestWithContext(ctx, method, u.String(), body)

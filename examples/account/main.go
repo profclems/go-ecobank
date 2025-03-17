@@ -57,7 +57,11 @@ func main() {
 
 	fmt.Println("Code:", resp.Code)
 	fmt.Println("Message:", resp.Message)
-	checkErr(json.NewEncoder(os.Stdout).Encode(account))
+	fmt.Println("Account Number:", account.AccountNo)
+	fmt.Println("Client ID:", account.ClientID)
+	fmt.Println("Track Ref:", account.TrackRef)
+	fmt.Println("Short Name:", account.Shortname)
+	fmt.Println("Mobile Number:", account.MobileNo)
 	fmt.Println()
 
 	// get account balance
@@ -73,7 +77,11 @@ func main() {
 
 	fmt.Println("Code:", resp.Code)
 	fmt.Println("Message:", resp.Message)
-	checkErr(json.NewEncoder(os.Stdout).Encode(acctBal))
+	fmt.Println("Account Number:", acctBal.AccountNo)
+	fmt.Println("Account Name:", acctBal.AccountName)
+	fmt.Println("Available Balance:", acctBal.AvailableBalance)
+	fmt.Println("Current Balance:", acctBal.CurrentBalance)
+	fmt.Println("Currency:", acctBal.Currency)
 	fmt.Println()
 
 	// get account details
@@ -89,7 +97,10 @@ func main() {
 
 	fmt.Println("Code:", resp.Code)
 	fmt.Println("Message:", resp.Message)
-	checkErr(json.NewEncoder(os.Stdout).Encode(enquiry))
+	fmt.Println("Account Name:", enquiry.AccountName)
+	fmt.Println("Account Number:", enquiry.AccountNo)
+	fmt.Println("Account Status:", enquiry.AccountStatus)
+	fmt.Println("Currency:", enquiry.Currency)
 	fmt.Println()
 
 	fmt.Println("Getting third party account details")
@@ -104,7 +115,9 @@ func main() {
 	checkErr(errors.Wrap(err, "failed to get third party account details"))
 	fmt.Println("Code:", resp.Code)
 	fmt.Println("Message:", resp.Message)
-	checkErr(json.NewEncoder(os.Stdout).Encode(enquiryTP))
+	fmt.Println("Account Name:", enquiryTP.AccountName)
+	fmt.Println("Account Number:", enquiryTP.AccountType)
+	fmt.Println("Account Status:", enquiryTP.AccountStatus)
 	fmt.Println()
 
 	fmt.Println("Generating account statement...")
@@ -117,6 +130,7 @@ func main() {
 		StartDate:     ecobank.NewDate(time.Date(2020, 3, 1, 0, 0, 0, 0, time.UTC)),
 		EndDate:       ecobank.NewDate(time.Date(2020, 3, 16, 0, 0, 0, 0, time.UTC)),
 	}
+	statementOptions.SetHash("aa708d5f5434bc385d9b096ff663bd19abb07658e0c7c3b0580a616dded6e05218ebdef8b1c1547446993b99a04f7e65885ca44b5dc6548acbbfd2b5d1117e5c")
 	// generate account statement
 	statement, resp, err := client.Account.GenerateStatement(ctx, statementOptions)
 	checkErr(errors.Wrap(err, "failed to generate statement"))
