@@ -7,11 +7,13 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"reflect"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/hashicorp/go-retryablehttp"
@@ -36,6 +38,7 @@ type Client struct {
 	baseURL *url.URL
 
 	// Token for authenticating requests.
+	tokenMu        sync.RWMutex
 	token          string
 	tokenExpiresAt time.Time
 
@@ -50,6 +53,22 @@ type Client struct {
 	Payment    *PaymentService
 	Remittance *RemittanceService
 	Status     *StatusService
+}
+
+// getToken returns the token and expiry time.
+// It is safe for concurrent access since it obtains a lock before reading.
+func (c *Client) getToken() (string, time.Time) {
+	c.tokenMu.RLock()
+	defer c.tokenMu.RUnlock()
+	return c.token, c.tokenExpiresAt
+}
+
+// setToken sets the token and expiry time.
+// It is safe for concurrent access since it obtains a lock before writing.
+func (c *Client) setToken(token string, expiresAt time.Time) {
+	c.tokenMu.Lock()
+	defer c.tokenMu.Unlock()
+	c.token, c.tokenExpiresAt = token, expiresAt
 }
 
 // NewClient returns a new Ecobank API client.
@@ -144,7 +163,7 @@ func DoRequest[T any](ctx context.Context, client *Client, method, path string, 
 }
 
 // Login authenticates the client and stores the access token in the client.
-func (c *Client) Login(ctx context.Context) (err error) {
+func (c *Client) Login(ctx context.Context) error {
 	req := &AccessTokenOptions{
 		UserID:   c.username,
 		Password: c.password,
@@ -159,12 +178,13 @@ func (c *Client) Login(ctx context.Context) (err error) {
 		return errors.New(resp.Status)
 	}
 
-	c.token = token.Token
-	c.tokenExpiresAt, err = getTokenExpiry(c.token)
+	expiry, err := getTokenExpiry(c.token)
 	if err != nil {
 		// set a default expiry time
-		c.tokenExpiresAt = time.Now().Add(defaultTokenExpiry)
+		expiry = time.Now().Add(defaultTokenExpiry)
 	}
+
+	c.setToken(token.Token, expiry)
 
 	return nil
 }
@@ -269,16 +289,20 @@ func (c *Client) NewRequest(ctx context.Context, method, path string, opts any) 
 //		}
 //	}
 func (c *Client) Do(req *retryablehttp.Request, v any) (*Response, error) {
+	token, expiry := c.getToken()
 	// authenticate if token is not set or has expired
-	if c.token == "" || (!c.tokenExpiresAt.IsZero() && time.Now().After(c.tokenExpiresAt)) {
+	if token == "" || (!expiry.IsZero() && time.Now().After(expiry)) {
 		if c.username == "" && c.password == "" {
-			return nil, errors.New("no credentials provided to acquire a token")
+			return nil, errors.New("token expired")
 		}
 		if err := c.Login(req.Context()); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to re-authenticate: %w", err)
 		}
+
+		token, _ = c.getToken()
 	}
-	req.Header.Add("Authorization", "Bearer "+c.token)
+
+	req.Header.Add("Authorization", "Bearer "+token)
 
 	resp, err := c.doRequest(req, v)
 	if err != nil {
