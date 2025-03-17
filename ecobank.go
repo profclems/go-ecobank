@@ -24,7 +24,7 @@ const (
 	contentType    = "application/json"
 
 	// by default, token expires in 2 hours
-	defautlTokenExpiry = 7200 * time.Second
+	defaultTokenExpiry = 7200 * time.Second
 )
 
 // Client manages communication with the Ecobank API.
@@ -49,6 +49,7 @@ type Client struct {
 	Account    *AccountService
 	Payment    *PaymentService
 	Remittance *RemittanceService
+	Status     *StatusService
 }
 
 // NewClient returns a new Ecobank API client.
@@ -162,7 +163,7 @@ func (c *Client) Login(ctx context.Context) (err error) {
 	c.tokenExpiresAt, err = getTokenExpiry(c.token)
 	if err != nil {
 		// set a default expiry time
-		c.tokenExpiresAt = time.Now().Add(defautlTokenExpiry)
+		c.tokenExpiresAt = time.Now().Add(defaultTokenExpiry)
 	}
 
 	return nil
@@ -269,7 +270,7 @@ func (c *Client) NewRequest(ctx context.Context, method, path string, opts any) 
 //	}
 func (c *Client) Do(req *retryablehttp.Request, v any) (*Response, error) {
 	// authenticate if token is not set or has expired
-	if c.token == "" || time.Now().After(c.tokenExpiresAt) {
+	if c.token == "" || (!c.tokenExpiresAt.IsZero() && time.Now().After(c.tokenExpiresAt)) {
 		if c.username == "" && c.password == "" {
 			return nil, errors.New("no credentials provided to acquire a token")
 		}
@@ -308,7 +309,7 @@ func (c *Client) doRequest(req *retryablehttp.Request, v any) (*Response, error)
 		if _, ok := v.(*BearerToken); ok {
 			err = json.NewDecoder(resp.Body).Decode(v)
 		} else {
-			var respData ResponseData
+			var respData responseData
 			err = json.NewDecoder(resp.Body).Decode(&respData)
 			if err == nil {
 				r.Code = respData.ResponseCode
@@ -373,8 +374,7 @@ func generateSecureHash(data, key string) string {
 	return hex.EncodeToString(hash[:])
 }
 
-// ResponseData represents the data returned by the API.
-type ResponseData struct {
+type responseData struct {
 	ResponseCode    int             `json:"response_code"`
 	ResponseMessage string          `json:"response_message"`
 	ResponseContent json.RawMessage `json:"response_content"`
@@ -384,7 +384,7 @@ type ResponseData struct {
 
 var emptyResponseContent = []byte{0x22, 0x22}
 
-func unmarshalResponse(resp any, data *ResponseData) error {
+func unmarshalResponse(resp any, data *responseData) error {
 	if data.ResponseContent == nil || bytes.Equal(data.ResponseContent, emptyResponseContent) {
 		return nil
 	}
