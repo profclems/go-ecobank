@@ -49,6 +49,7 @@ type Client struct {
 	AccessToken *AccessTokenService
 	Account     *AccountService
 	Payment     *PaymentService
+	Remittance  *RemittanceService
 }
 
 // NewClient returns a new Ecobank API client.
@@ -83,7 +84,49 @@ func NewClient(username, password, labKey string, opts ...ClientOptionFunc) (*Cl
 	return c, nil
 }
 
-// DoRequest sends an API request and returns the API response.
+// DoRequest sends an HTTP API request using the provided client and returns the response.
+//
+// This is a generic function designed to handle API requests dynamically while decoding
+// the response into the expected type `T`. It abstracts away the request construction
+// and execution process, making API calls more reusable and consistent.
+//
+// Parameters:
+// - `ctx` (context.Context): The request context, allowing for request cancellation, timeouts, etc.
+// - `client` (*Client): The API client used to send the request.
+// - `method` (string): The HTTP method (e.g., "GET", "POST", "PUT", "DELETE").
+// - `path` (string): The endpoint path for the API request.
+// - `opt` (any): The request body or query parameters (can be nil).
+//
+// Returns:
+// - `*T`: A pointer to the parsed response body, unmarshaled into the expected type `T`.
+// - `*Response`: The full HTTP response, containing metadata such as headers and status code.
+// - `error`: An error if the request fails or response decoding encounters an issue.
+//
+// Workflow:
+// 1. Calls `client.NewRequest()` to create an HTTP request with the provided method, path, and options.
+// 2. Executes the request using client.Do(), which sends the request and decodes the response.
+// 3. If the request succeeds, the response body is unmarshaled into `T` and returned along with the HTTP response.
+// 4. If any error occurs (e.g., network failure, non-200 status code, JSON decoding issues), it is returned.
+//
+// Example:
+// ```go
+//
+//	type User struct {
+//	    ID   int    `json:"id"`
+//	    Name string `json:"name"`
+//	}
+//
+// client := NewClient("https://api.example.com")
+// ctx := context.Background()
+//
+// user, resp, err := DoRequest[User](ctx, client, "GET", "/users/123", nil)
+//
+//	if err != nil {
+//	    log.Fatalf("Request failed: %v", err)
+//	}
+//
+// fmt.Printf("User: %+v, Status: %d\n", user, resp.StatusCode)
+// ```
 func DoRequest[T any](ctx context.Context, client *Client, method, path string, opt any) (*T, *Response, error) {
 	req, err := client.NewRequest(ctx, method, path, opt)
 	if err != nil {
@@ -196,7 +239,37 @@ func (c *Client) NewRequest(ctx context.Context, method, path string, opts any) 
 	return req, nil
 }
 
-// Do sends an API request and returns the API response.
+// Do sends an authenticated API request, ensuring a valid token is set and adding it to the request header.
+//
+// It processes the API response, unmarshaling the `response_content` field into v, while extracting other response
+// metadata such as `response_code`, `response_message`, and `response_timestamp` into a *Response object.
+// The API response is expected to follow the format:
+//
+//	{
+//	  "response_code": "00",
+//	  "response_message": "Success",
+//	  "response_content": { ... },
+//	  "response_timestamp": "2025-03-16T12:34:56Z"
+//	}
+//
+// The `response_content` field is dynamically unmarshaled into v, while `response_code`, `response_message`,
+// and `response_timestamp` are stored in the returned *Response alongside the underlying HTTP response.
+//
+// If the API response contains an `errors` field, it is returned as an error of type ResponseError.
+// Use `errors.As(err, &ResponseError)` to extract the error details.
+//
+// Example:
+//
+//	var result SomeResponseType
+//	resp, err := client.Do(req, &result)
+//	if err != nil {
+//		var apiErr ResponseError
+//		if errors.As(err, &apiErr) {
+//			log.Println("API error:", apiErr)
+//		} else {
+//			log.Println("Request failed:", err)
+//		}
+//	}
 func (c *Client) Do(req *retryablehttp.Request, v any) (*Response, error) {
 	// authenticate if token is not set or has expired
 	if c.token == "" || time.Now().After(c.tokenExpiresAt) {
@@ -215,7 +288,6 @@ func (c *Client) Do(req *retryablehttp.Request, v any) (*Response, error) {
 	}
 
 	// TODO: Handle rate limiting
-	// TODO: Handle token expiration, and reauthenticate
 
 	return resp, nil
 }
@@ -225,11 +297,6 @@ func (c *Client) doRequest(req *retryablehttp.Request, v any) (*Response, error)
 	if err != nil {
 		return nil, err
 	}
-
-	// TODO: check response for errors
-	//if statusOk := resp.StatusCode >= 200 && resp.StatusCode < 300; !statusOk {
-	//	return resp, errors.New(resp.Status)
-	//}
 
 	r := newResponse(resp)
 

@@ -65,15 +65,13 @@ func (a *AccountService) GetBalance(ctx context.Context, opt *AccountBalanceOpti
 //
 // API docs: https://documenter.getpostman.com/view/9576712/2s7YtWCtNX#065afcf7-402b-4625-82d2-24f2dbbfe663
 type AccountEnquiry struct {
-	AccountNo       string `json:"accountNo"`
-	AccountName     string `json:"accountName"`
-	Currency        string `json:"ccy"`
-	AccountStatus   string `json:"accountStatus"`
-	ResponseCode    string `json:"responseCode"`
-	ResponseMessage string `json:"responseMessage"`
-	AffiliateCode   string `json:"affiliateCode"`
-	RequestID       string `json:"requestId"`
-	SourceCode      string `json:"sourceCode"`
+	AccountNo     string `json:"accountNo"`
+	AccountName   string `json:"accountName"`
+	Currency      string `json:"ccy"`
+	AccountStatus string `json:"accountStatus"`
+	AffiliateCode string `json:"affiliateCode"`
+	RequestID     string `json:"requestId"`
+	SourceCode    string `json:"sourceCode"`
 }
 
 // AccountEnquiryOptions represents a request to get account details.

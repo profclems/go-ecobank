@@ -8,18 +8,54 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+// PaymentType represents the supported payment types for the Ecobank API.
+//
+// API docs:
+//   - https://documenter.getpostman.com/view/9576712/2s7YtWCtNX#fca97841-db96-4828-bc1b-525e973efe91
+//   - https://documenter.getpostman.com/view/9576712/2s7YtWCtNX#acfe7f55-27aa-487d-ba1a-799ecb466bd7
 type PaymentType string
 
 const (
-	BILLPAYMENT  PaymentType = "BILLPAYMENT"
-	TOKEN        PaymentType = "TOKEN"
-	TOKENIA      PaymentType = "TOKENIA"
-	DOMESTIC     PaymentType = "DOMESTIC"
-	INTERBANK    PaymentType = "INTERBANK"
-	INTERBANKIA  PaymentType = "INTERBANKIA"
+	// BILLPAYMENT allows customer to make bill payment, by enabling customer
+	// to validate references pertaining to a bill and further allow payment.
+	BILLPAYMENT PaymentType = "BILLPAYMENT"
+
+	// TOKEN allows customer to make cash payment to their beneficiaries and
+	// enable withdrawal to be done via ATM or Xpress point using the
+	// generated Token upon successfully sending an instruction.
+	TOKEN PaymentType = "TOKEN"
+
+	// TOKENIA is used for movement of funds between countries to credit
+	// a third party or local bank account at the receiving country/affiliate.
+	// For example, sending from an Ecobank Ghana account to an account
+	// in another bank (other than Ecobank) in the receiving country.
+	TOKENIA PaymentType = "TOKENIA"
+
+	// DOMESTIC enables customer to send an instruction to debit an account
+	// within Ecobank and credit another Ecobank account holder of the same country
+	DOMESTIC PaymentType = "DOMESTIC"
+
+	// INTERBANK enables customer debit an account within Ecobank and credit
+	// a beneficiary's account with another bank in the same country.
+	// This caters for Instant payment, RTGS, SICA, SYGMA and TFT transactions.
+	INTERBANK PaymentType = "INTERBANK"
+
+	// INTERBANKIA is used for movement of funds between countries to credit
+	// a third party or local bank account at the receiving country/affiliate.
+	// For example, sending from an Ecobank Ghana account to an account
+	// in another bank (other than Ecobank) in the receiving country.
+	INTERBANKIA PaymentType = "INTERBANKIA"
+
+	// AIRTIMETOPUP allows customer make airtime top-up request to credit Momo accounts
+	// across affiliates where Ecobank have an integration with MNO’s
 	AIRTIMETOPUP PaymentType = "AIRTIMETOPUP"
-	MOMO         PaymentType = "MOMO"
-	MOMOIA       PaymentType = "MOMOIA"
+
+	// MOMO allows customers to initiate bank-to-wallet transactions across
+	// affiliates where Ecobank has an integration with the telcos/aggregators
+	MOMO PaymentType = "MOMO"
+	// MOMOIA is used for the movement of funds between countries to credit
+	// a mobile wallet account in the receiving affiliate/country.
+	MOMOIA PaymentType = "MOMOIA"
 )
 
 // PaymentParamInterface defines an interface for payment parameters that can be serialized into JSON.
@@ -127,7 +163,7 @@ func (param *PaymentParams[T]) MarshalJSON() ([]byte, error) {
 	return []byte(b.String()), nil
 }
 
-// DomesticTransferParams represents the parameters for a domestic transfer.
+// DomesticTransferParams represents the parameters for DOMESTIC payment type.
 type DomesticTransferParams struct {
 	CreditAccountNo     string          `json:"creditAccountNo"`
 	DebitAccountBranch  string          `json:"debitAccountBranch"`
@@ -138,7 +174,7 @@ type DomesticTransferParams struct {
 	Currency            string          `json:"ccy"`
 }
 
-// TokenTransferParams represents the parameters for a token transfer.
+// TokenTransferParams represents the parameters TOKEN payment type.
 type TokenTransferParams struct {
 	TransactionDescription string          `json:"transactionDescription"`
 	SecretCode             string          `json:"secretCode"`
@@ -155,7 +191,7 @@ type TokenTransferParams struct {
 	WithdrawalChannel      string          `json:"withdrawalChannel"`
 }
 
-// TokenIAParams represents the parameters for a token inter-affiliate transfer.
+// TokenIAParams represents the parameters for TOKENIA payment type.
 type TokenIAParams struct {
 	DestAffiliate          string          `json:"destAffiliate"`
 	DestCrncy              string          `json:"destCrncy"`
@@ -175,7 +211,7 @@ type TokenIAParams struct {
 	SendExternalRef        string          `json:"sendExternalRef"`
 }
 
-// InterbankTransferParams represents the parameters for an interbank transfer.
+// InterbankTransferParams represents the parameters for INTERBANK payment type.
 type InterbankTransferParams struct {
 	DestinationBankCode  string          `json:"destinationBankCode"`
 	SenderName           string          `json:"senderName"`
@@ -190,7 +226,7 @@ type InterbankTransferParams struct {
 	TransferType         string          `json:"transferType"`
 }
 
-// InterbankIAParams represents the parameters for an interbank inter-affiliate transfer.
+// InterbankIAParams represents the parameters for INTERBANKIA payment type.
 type InterbankIAParams struct {
 	DestinationCountry   string          `json:"destinationCountry"`
 	DestinationBankCode  string          `json:"destinationBankCode"`
@@ -203,7 +239,7 @@ type InterbankIAParams struct {
 	SettleCurrency       string          `json:"settleCurrency"`
 }
 
-// BillPaymentParams represents the parameters for a bill payment.
+// BillPaymentParams represents the parameters for BILLPAYMENT payment type.
 type BillPaymentParams struct {
 	BillerCode    string        `json:"billerCode"`
 	BillRefNo     string        `json:"billRefNo"`
@@ -214,7 +250,7 @@ type BillPaymentParams struct {
 	FormDataValue FormDataArray `json:"formDataValue"`
 }
 
-// AirtimeTopupParams represents the parameters for an airtime topup.
+// AirtimeTopupParams represents the parameters for AIRTIMETOPUP payment type.
 type AirtimeTopupParams struct {
 	BillerCode    string        `json:"billerCode"`
 	BillRefNo     string        `json:"billRefNo"`
@@ -225,7 +261,7 @@ type AirtimeTopupParams struct {
 	FormDataValue FormDataArray `json:"formDataValue"`
 }
 
-// MomoParams represents the parameters for a mobile money transfer.
+// MomoParams represents the parameters for MOMO payment type.
 type MomoParams struct {
 	BillerCode    string        `json:"billerCode"`
 	BillRefNo     string        `json:"billRefNo"`
@@ -234,6 +270,26 @@ type MomoParams struct {
 	CustomerRefNo string        `json:"customerRefNo"`
 	ProductCode   string        `json:"productCode"`
 	FormDataValue FormDataArray `json:"formDataValue"`
+}
+
+// MomoIAParams represents the parameters for MOMOIA payment type.
+type MomoIAParams struct {
+	DestAffiliate          string          `json:"destAffiliate"`
+	DestCrncy              string          `json:"destCrncy"`
+	DestinationAccount     string          `json:"destinationAccount"`
+	DestinationAccountName string          `json:"destinationAccountName"`
+	ReceiveFirstName       string          `json:"receiveFirstName"`
+	ReceiveLastName        string          `json:"receiveLastName"`
+	ReceiverPhoneNumber    string          `json:"receiverPhoneNumber"`
+	ReceiveEmailAddress    string          `json:"receiveEmailAddress"`
+	ReceiveIdType          string          `json:"receiveIdType"`
+	ReceiveIdNumber        string          `json:"receiveIdNumber"`
+	SourceAmount           decimal.Decimal `json:"sourceAmount"`
+	TestQuestion           string          `json:"testQuestion"`
+	TestAnswer             string          `json:"testAnswer"`
+	Narration              string          `json:"narration"`
+	PurposeOfTransfer      string          `json:"purposeOfTransfer"`
+	SendExternalRef        string          `json:"sendExternalRef"`
 }
 
 type FormDataArray []FormData
