@@ -32,7 +32,8 @@ const (
 // Client manages communication with the Ecobank API.
 type Client struct {
 	// HTTP client used to communicate with the API.
-	client *retryablehttp.Client
+	client         *retryablehttp.Client
+	disableRetries bool
 
 	// Base URL for API requests.
 	baseURL *url.URL
@@ -85,6 +86,8 @@ func NewClient(username, password, labKey string, opts ...ClientOptionFunc) (*Cl
 	c.client.RetryWaitMax = 400 * time.Millisecond
 	c.client.RetryMax = 5
 	c.client.Logger = nil
+	c.client.CheckRetry = c.retryHTTPCheck
+	c.client.ErrorHandler = retryablehttp.PassthroughErrorHandler
 
 	if err := c.setBaseURL(defaultBaseURL); err != nil {
 		return nil, err
@@ -349,6 +352,21 @@ func (c *Client) doRequest(req *retryablehttp.Request, v any) (*Response, error)
 	}
 
 	return r, err
+}
+
+// retryHTTPCheck provides a callback for Client.CheckRetry which
+// will retry both rate limit (429) and server (>= 500) errors.
+func (c *Client) retryHTTPCheck(ctx context.Context, resp *http.Response, err error) (bool, error) {
+	if ctx.Err() != nil {
+		return false, ctx.Err()
+	}
+	if err != nil {
+		return false, err
+	}
+	if !c.disableRetries && (resp.StatusCode == 429 || resp.StatusCode >= 500) {
+		return true, nil
+	}
+	return false, nil
 }
 
 func (c *Client) ensureSecureHash(opt any) {

@@ -58,3 +58,27 @@ func WithUserAgent(userAgent string) ClientOptionFunc {
 		return nil
 	}
 }
+
+// WithDisableRetries disables retries for the client.
+func WithDisableRetries() ClientOptionFunc {
+	return func(c *Client) error {
+		c.disableRetries = true
+		return nil
+	}
+}
+
+// WithRetryPolicy sets the retry policy for the client.
+func WithRetryPolicy(retry retryablehttp.CheckRetry) ClientOptionFunc {
+	return func(c *Client) error {
+		c.client.CheckRetry = retry
+		return nil
+	}
+}
+
+// WithBackoff sets the backoff strategy for the client.
+func WithBackoff(backoff retryablehttp.Backoff) ClientOptionFunc {
+	return func(c *Client) error {
+		c.client.Backoff = backoff
+		return nil
+	}
+}
