@@ -26,22 +26,22 @@ func main() {
 
 	req := &ecobank.PaymentOptions{
 		PaymentHeader: ecobank.PaymentHeader{
-			Clientid:          "EGHTelc000043",
-			Batchsequence:     "1",
-			Batchamount:       decimal.NewFromInt(520),
+			ClientID:          "EGHTelc000043",
+			BatchSequence:     "1",
+			BatchAmount:       decimal.NewFromInt(520),
 			Transactionamount: decimal.NewFromInt(520),
-			Batchid:           "EG1593490",
-			Transactioncount:  6,
-			Batchcount:        6,
-			Transactionid:     "E12T443308",
-			Debittype:         "Multiple",
+			BatchID:           "EG1593490",
+			TransactionCount:  6,
+			BatchCount:        6,
+			TransactionID:     "E12T443308",
+			DebitType:         "Multiple",
 			AffiliateCode:     "EGH",
-			Totalbatches:      "1",
+			TotalBatches:      "1",
 			ExecutionDate:     ecobank.NewTime(time.Date(2020, 6, 1, 0, 0, 0, 0, time.UTC)),
 		},
 		Extension: []ecobank.PaymentExtension{
 			{
-				RequestId:   "2323",
+				RequestID:   "2323",
 				RequestType: ecobank.DOMESTIC,
 				ParamList: ecobank.NewPaymentParams(ecobank.DomesticTransferParams{
 					CreditAccountNo:     "1441001996321",
@@ -57,7 +57,7 @@ func main() {
 				RateType: "spot",
 			},
 			{
-				RequestId:   "432",
+				RequestID:   "432",
 				RequestType: ecobank.TOKEN,
 				ParamList: ecobank.NewPaymentParams(ecobank.TokenTransferParams{
 					TransactionDescription: "Service payment for electrical repairs.",
@@ -79,7 +79,7 @@ func main() {
 				RateType: "spot",
 			},
 			{
-				RequestId:   "2325",
+				RequestID:   "2325",
 				RequestType: ecobank.INTERBANK,
 				ParamList: ecobank.NewPaymentParams(ecobank.InterbankTransferParams{
 					DestinationBankCode:  "ASB",
@@ -99,7 +99,7 @@ func main() {
 				RateType: "spot",
 			},
 			{
-				RequestId:   "ECI55096987905",
+				RequestID:   "ECI55096987905",
 				RequestType: ecobank.BILLPAYMENT,
 				ParamList: ecobank.NewPaymentParams(ecobank.BillPaymentParams{
 					BillerCode:    "Pass_Bio_ECI",
@@ -122,7 +122,7 @@ func main() {
 				RateType: "spot",
 			},
 			{
-				RequestId:   "WQ5500098663046",
+				RequestID:   "WQ5500098663046",
 				RequestType: ecobank.AIRTIMETOPUP,
 				ParamList: ecobank.NewPaymentParams(ecobank.AirtimeTopupParams{
 					BillerCode:    "A02E",
@@ -140,7 +140,7 @@ func main() {
 				RateType: "spot",
 			},
 			{
-				RequestId:   "1234BBY8SXZX",
+				RequestID:   "1234BBY8SXZX",
 				RequestType: ecobank.MOMO,
 				ParamList: ecobank.NewPaymentParams(ecobank.MomoParams{
 					BillerCode:    "AIRTELTIGOEGH",

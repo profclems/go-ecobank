@@ -148,23 +148,23 @@ type PaymentOptions struct {
 
 // PaymentHeader is the main payload for a payment request.
 type PaymentHeader struct {
-	Batchsequence     string          `json:"batchsequence"`
-	Batchamount       decimal.Decimal `json:"batchamount"`
+	BatchSequence     string          `json:"batchsequence"`
+	BatchAmount       decimal.Decimal `json:"batchamount"`
 	Transactionamount decimal.Decimal `json:"transactionamount"`
-	Batchid           string          `json:"batchid"`
-	Transactioncount  int             `json:"transactioncount"`
-	Batchcount        int             `json:"batchcount"`
-	Transactionid     string          `json:"transactionid"`
-	Debittype         string          `json:"debittype"`
+	BatchID           string          `json:"batchid"`
+	TransactionCount  int             `json:"transactioncount"`
+	BatchCount        int             `json:"batchcount"`
+	TransactionID     string          `json:"transactionid"`
+	DebitType         string          `json:"debittype"`
 	AffiliateCode     string          `json:"affiliateCode"`
-	Totalbatches      string          `json:"totalbatches"`
+	TotalBatches      string          `json:"totalbatches"`
 	ExecutionDate     Time            `json:"execution_date"`
-	Clientid          string          `json:"clientid"`
+	ClientID          string          `json:"clientid"`
 }
 
 // PaymentExtension contains additional information for a payment request.
 type PaymentExtension struct {
-	RequestId   string                `json:"request_id"`
+	RequestID   string                `json:"request_id"`
 	RequestType PaymentType           `json:"request_type"`
 	ParamList   PaymentParamInterface `json:"param_list"`
 	Amount      decimal.Decimal       `json:"amount"`

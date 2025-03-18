@@ -17,7 +17,7 @@ type RemittanceService struct {
 //
 // API docs: https://documenter.getpostman.com/view/9576712/2s7YtWCtNX#eaeb6f0a-107d-4717-b202-b8eee1529b74
 type Institution struct {
-	InstitutionId   string `json:"institutionId"`
+	InstitutionID   string `json:"institutionId"`
 	InstitutionType string `json:"institutionType"`
 	InstitutionName string `json:"institutionName"`
 	CountryCode     string `json:"countryCode"`
@@ -64,8 +64,8 @@ type RemitteeAccount struct {
 //
 // API docs: https://documenter.getpostman.com/view/9576712/2s7YtWCtNX#68970106-787a-4cfe-917f-91b2e3701bf3
 type GetRemitteeAccountOptions struct {
-	RequestId             string `json:"requestId"`
-	ClientId              string `json:"clientId"`
+	RequestID             string `json:"requestId"`
+	ClientID              string `json:"clientId"`
 	AffiliateCode         string `json:"affiliateCode"`
 	DeliveryMethod        string `json:"deliveryMethod"`
 	DestinationEntityCode string `json:"destinationEntityCode"`

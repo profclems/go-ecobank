@@ -193,16 +193,16 @@ type TokenTransferParams struct {
 
 // TokenIAParams represents the parameters for TOKENIA payment type.
 type TokenIAParams struct {
-	DestAffiliate          string          `json:"destAffiliate"`
-	DestCrncy              string          `json:"destCrncy"`
+	DestinationAffiliate   string          `json:"destAffiliate"`
+	DestinationCurrency    string          `json:"destCrncy"`
 	DestinationAccount     string          `json:"destinationAccount"`
 	DestinationAccountName string          `json:"destinationAccountName"`
-	ReceiveFirstName       string          `json:"receiveFirstName"`
-	ReceiveLastName        string          `json:"receiveLastName"`
+	ReceiverFirstName      string          `json:"receiveFirstName"`
+	ReceiverLastName       string          `json:"receiveLastName"`
 	ReceiverPhoneNumber    string          `json:"receiverPhoneNumber"`
-	ReceiveEmailAddress    string          `json:"receiveEmailAddress"`
-	ReceiveIdType          string          `json:"receiveIdType"`
-	ReceiveIdNumber        string          `json:"receiveIdNumber"`
+	ReceiverEmailAddress   string          `json:"receiveEmailAddress"`
+	ReceiverIDType         string          `json:"receiveIdType"`
+	ReceiverIDNumber       string          `json:"receiveIdNumber"`
 	SourceAmount           decimal.Decimal `json:"sourceAmount"`
 	TestQuestion           string          `json:"testQuestion"`
 	TestAnswer             string          `json:"testAnswer"`
@@ -274,16 +274,16 @@ type MomoParams struct {
 
 // MomoIAParams represents the parameters for MOMOIA payment type.
 type MomoIAParams struct {
-	DestAffiliate          string          `json:"destAffiliate"`
-	DestCrncy              string          `json:"destCrncy"`
+	DestinationAffiliate   string          `json:"destAffiliate"`
+	DestinationCurrency    string          `json:"destCrncy"`
 	DestinationAccount     string          `json:"destinationAccount"`
 	DestinationAccountName string          `json:"destinationAccountName"`
-	ReceiveFirstName       string          `json:"receiveFirstName"`
-	ReceiveLastName        string          `json:"receiveLastName"`
+	ReceiverFirstName      string          `json:"receiveFirstName"`
+	ReceiverLastName       string          `json:"receiveLastName"`
 	ReceiverPhoneNumber    string          `json:"receiverPhoneNumber"`
-	ReceiveEmailAddress    string          `json:"receiveEmailAddress"`
-	ReceiveIdType          string          `json:"receiveIdType"`
-	ReceiveIdNumber        string          `json:"receiveIdNumber"`
+	ReceiverEmailAddress   string          `json:"receiveEmailAddress"`
+	ReceiverIDType         string          `json:"receiveIdType"`
+	ReceiverIDNumber       string          `json:"receiveIdNumber"`
 	SourceAmount           decimal.Decimal `json:"sourceAmount"`
 	TestQuestion           string          `json:"testQuestion"`
 	TestAnswer             string          `json:"testAnswer"`
